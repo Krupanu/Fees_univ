@@ -11,7 +11,6 @@ import java.util.Scanner;
 
 public class TaxiFleetApp {
     private static final String DATA_FILE = "taxifleet.dat";
-    private static List<User> users = new ArrayList<>();
     private static Scanner scanner = new Scanner(System.in);
     private static TaxiFleet taxiFleet = null;
 
@@ -60,11 +59,6 @@ public class TaxiFleetApp {
                     System.out.println("Неверный выбор. Попробуйте снова.");
             }
         }
-    }
-
-    private static void initializeUsers() {
-        users.add(new User("admin", "admin123", "admin"));
-        users.add(new User("user", "user123", "user"));
     }
 
 
