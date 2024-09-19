@@ -1,3 +1,7 @@
+package Objects.Cars;
+
+import Objects.Car;
+
 public class SUV extends Car {
     private static final long serialVersionUID = 1L;
 

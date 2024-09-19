@@ -1,3 +1,9 @@
+package Objects;
+
+import Objects.Cars.Hatchback;
+import Objects.Cars.SUV;
+import Objects.Cars.Sedan;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,11 +16,7 @@ public class TaxiFleetApp {
     private static TaxiFleet taxiFleet = null;
 
     public static void main(String[] args) {
-        // Инициализация пользователей
-        initializeUsers();
 
-
-        // Меню
         boolean exit = false;
         while (!exit) {
             showMenu();
@@ -61,7 +63,6 @@ public class TaxiFleetApp {
     }
 
     private static void initializeUsers() {
-        // В реальном приложении данные пользователей хранились бы в базе данных или защищенном файле
         users.add(new User("admin", "admin123", "admin"));
         users.add(new User("user", "user123", "user"));
     }

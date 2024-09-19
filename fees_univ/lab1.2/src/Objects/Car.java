@@ -1,3 +1,5 @@
+package Objects;
+
 import java.io.Serializable;
 
 public abstract class Car implements Serializable {
