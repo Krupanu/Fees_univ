@@ -4,183 +4,139 @@ import Objects.Cars.Hatchback;
 import Objects.Cars.SUV;
 import Objects.Cars.Sedan;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class TaxiFleetApp {
-    private static final String DATA_FILE = "taxifleet.dat";
-    private static Scanner scanner = new Scanner(System.in);
-    private static TaxiFleet taxiFleet = null;
+    private static final String DATA_FILE = "taxiFleet.dat";
+    private TaxiFleet taxiFleet;
+    private Scanner scanner;
+
+    public TaxiFleetApp() {
+        taxiFleet = new TaxiFleet();
+        scanner = new Scanner(System.in);
+    }
 
     public static void main(String[] args) {
+        TaxiFleetApp app = new TaxiFleetApp();
+        app.showMenu();
+    }
 
-        boolean exit = false;
-        while (!exit) {
-            showMenu();
-            System.out.print("Выберите пункт меню: ");
-            String choice = scanner.nextLine();
+    private void showMenu() {
+        while (true) {
+            System.out.println("\nМеню:");
+            System.out.println("1. Добавить автомобиль");
+            System.out.println("2. Отобразить автопарк");
+            System.out.println("3. Фильтровать по цене");
+            System.out.println("4. Фильтровать по типу кузова");
+            System.out.println("5. Сбросить фильтры");
+            System.out.println("6. Рассчитать общую стоимость");
+            System.out.println("7. Выйти");
+            System.out.print("Выберите пункт: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();  // Пропустить перевод строки
 
             switch (choice) {
-                case "1":
-                    readFromFile();
+                case 1:
+                    addCarToFleet();
                     break;
-                case "2":
-                    writeToFile();
+                case 2:
+                    taxiFleet.displayFleet();
                     break;
-                case "3":
-                    if (taxiFleet == null) {
-                        System.out.println("Сначала необходимо загрузить данные из файла или создать новый автопарк.");
-                    } else {
-                        addCarToFleet();
-                    }
+                case 3:
+                    applyPriceFilter();
                     break;
-                case "4":
-                    if (taxiFleet == null) {
-                        System.out.println("Сначала необходимо загрузить данные из файла или создать новый автопарк.");
-                    } else {
-                        taxiFleet.displayFleet();
-                    }
+                case 4:
+                    applyTypeFilter();
                     break;
-                case "5":
-                    if (taxiFleet == null) {
-                        System.out.println("Сначала необходимо загрузить данные из файла или создать новый автопарк.");
-                    } else {
-                        double totalCost = taxiFleet.calculateTotalCost();
-                        System.out.println("Общая стоимость автопарка: " + String.format("%.3f", totalCost));
-                    }
+                case 5:
+                    taxiFleet.resetFilters();
+                    System.out.println("Фильтры сброшены.");
                     break;
-                case "0":
-                    exit = true;
-                    System.out.println("Выход из программы.");
+                case 6:
+                    System.out.printf("Общая стоимость: %.3f%n", taxiFleet.calculateTotalCost());
                     break;
+                case 7:
+                    System.out.println("Выход...");
+                    return;
                 default:
-                    System.out.println("Неверный выбор. Попробуйте снова.");
+                    System.out.println("Неверный пункт меню.");
             }
         }
     }
 
-
-    private static void showMenu() {
-        System.out.println("\n=== Меню ===");
-        System.out.println("1. Чтение из файла");
-        System.out.println("2. Запись в файл");
-        System.out.println("3. Добавить автомобиль в автопарк");
-        System.out.println("4. Показать автопарк");
-        System.out.println("5. Рассчитать стоимость автопарка");
-        System.out.println("0. Выход");
-    }
-
-    private static void readFromFile() {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(DATA_FILE))) {
-            taxiFleet = (TaxiFleet) ois.readObject();
-            System.out.println("Данные успешно загружены из файла.");
-        } catch (FileNotFoundException e) {
-            System.out.println("Файл не найден. Создается новый автопарк.");
-            taxiFleet = new TaxiFleet();
-        } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Ошибка при чтении файла: " + e.getMessage());
-            taxiFleet = new TaxiFleet();
-        }
-    }
-
-    private static void writeToFile() {
-        if (taxiFleet == null) {
-            System.out.println("Нет данных для записи. Сначала создайте автопарк или загрузите данные.");
-            return;
-        }
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(DATA_FILE))) {
-            oos.writeObject(taxiFleet);
-            System.out.println("Данные успешно сохранены в файл.");
-        } catch (IOException e) {
-            System.out.println("Ошибка при записи файла: " + e.getMessage());
-        }
-    }
-
-    private static void addCarToFleet() {
-        System.out.println("\n=== Добавить автомобиль ===");
-        System.out.println("Выберите тип автомобиля:");
-        System.out.println("1. Седан");
-        System.out.println("2. Хэтчбек");
-        System.out.println("3. Внедорожник");
-        System.out.print("Ваш выбор: ");
-        String typeChoice = scanner.nextLine();
-
-        System.out.print("Модель автомобиля: ");
+    private void addCarToFleet() {
+        System.out.print("Введите модель автомобиля: ");
         String model = scanner.nextLine();
+        System.out.print("Введите цену автомобиля: ");
+        double price = scanner.nextDouble();
+        scanner.nextLine(); // Пропустить перевод строки
 
-        double price = 0;
-        while (true) {
-            System.out.print("Цена автомобиля: ");
-            String priceInput = scanner.nextLine();
-            try {
-                price = Double.parseDouble(priceInput);
-                if (price < 0) {
-                    throw new NumberFormatException("Цена не может быть отрицательной.");
-                }
-                break;
-            } catch (NumberFormatException e) {
-                System.out.println("Неверный ввод цены. Попробуйте снова.");
-            }
-        }
+        System.out.println("Выберите тип автомобиля:");
+        System.out.println("1. Sedan");
+        System.out.println("2. Hatchback");
+        System.out.println("3. SUV");
+        int carTypeChoice = scanner.nextInt();
+        scanner.nextLine(); // Пропустить перевод строки
 
-        switch (typeChoice) {
-            case "1":
-                int seats = 0;
-                while (true) {
-                    System.out.print("Количество мест: ");
-                    String seatsInput = scanner.nextLine();
-                    try {
-                        seats = Integer.parseInt(seatsInput);
-                        if (seats <= 0) {
-                            throw new NumberFormatException("Количество мест должно быть положительным.");
-                        }
-                        break;
-                    } catch (NumberFormatException e) {
-                        System.out.println("Неверный ввод. Попробуйте снова.");
-                    }
-                }
-                taxiFleet.addCar(new Sedan(model, price, seats));
+        Car car;
+        switch (carTypeChoice) {
+            case 1:
+                System.out.print("Введите количество мест: ");
+                int numberOfSeats = scanner.nextInt();
+                car = new Sedan(model, price, numberOfSeats);
                 break;
-            case "2":
-                boolean hasCargoSpace = false;
-                while (true) {
-                    System.out.print("Есть багажник? (да/нет): ");
-                    String cargoInput = scanner.nextLine().toLowerCase();
-                    if (cargoInput.equals("да")) {
-                        hasCargoSpace = true;
-                        break;
-                    } else if (cargoInput.equals("нет")) {
-                        hasCargoSpace = false;
-                        break;
-                    } else {
-                        System.out.println("Неверный ввод. Введите 'да' или 'нет'.");
-                    }
-                }
-                taxiFleet.addCar(new Hatchback(model, price, hasCargoSpace));
+            case 2:
+                System.out.print("Есть ли багажное отделение (true/false): ");
+                boolean hasCargoSpace = scanner.nextBoolean();
+                car = new Hatchback(model, price, hasCargoSpace);
                 break;
-            case "3":
-                double clearance = 0;
-                while (true) {
-                    System.out.print("Клиренс (см): ");
-                    String clearanceInput = scanner.nextLine();
-                    try {
-                        clearance = Double.parseDouble(clearanceInput);
-                        if (clearance < 0) {
-                            throw new NumberFormatException("Клиренс не может быть отрицательным.");
-                        }
-                        break;
-                    } catch (NumberFormatException e) {
-                        System.out.println("Неверный ввод. Попробуйте снова.");
-                    }
-                }
-                taxiFleet.addCar(new SUV(model, price, clearance));
+            case 3:
+                System.out.print("Введите клиренс автомобиля: ");
+                double groundClearance = scanner.nextDouble();
+                car = new SUV(model, price, groundClearance);
                 break;
             default:
-                System.out.println("Неверный тип автомобиля.");
+                System.out.println("Неверный выбор типа автомобиля.");
                 return;
         }
-        System.out.println("Автомобиль успешно добавлен в автопарк.");
+        taxiFleet.addCar(car);
+        System.out.println("Автомобиль добавлен в автопарк.");
+    }
+
+    private void applyPriceFilter() {
+        System.out.print("Введите минимальную цену: ");
+        double minPrice = scanner.nextDouble();
+        System.out.print("Введите максимальную цену: ");
+        double maxPrice = scanner.nextDouble();
+        taxiFleet.filterByPrice(minPrice, maxPrice);
+        System.out.println("Применен фильтр по цене.");
+    }
+
+    private void applyTypeFilter() {
+        System.out.println("Выберите тип автомобиля для фильтрации: ");
+        System.out.println("1. Sedan");
+        System.out.println("2. Hatchback");
+        System.out.println("3. SUV");
+        int carTypeChoice = scanner.nextInt();
+        scanner.nextLine(); // Пропустить перевод строки
+
+        String carType;
+        switch (carTypeChoice) {
+            case 1:
+                carType = "Sedan";
+                break;
+            case 2:
+                carType = "Hatchback";
+                break;
+            case 3:
+                carType = "SUV";
+                break;
+            default:
+                System.out.println("Неверный выбор типа автомобиля.");
+                return;
+        }
+        taxiFleet.filterByType(carType);
+        System.out.println("Применен фильтр по типу кузова.");
     }
 }

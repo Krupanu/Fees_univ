@@ -1,37 +1,58 @@
 package Objects;
 
-import Objects.Car;
-
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class TaxiFleet implements Serializable {
-    private static final long serialVersionUID = 1L;
-
+public class TaxiFleet {
     private List<Car> cars;
+    private List<Car> filteredCars;
 
     public TaxiFleet() {
         cars = new ArrayList<>();
+        filteredCars = new ArrayList<>(cars);
     }
 
     public void addCar(Car car) {
         cars.add(car);
+        resetFilters();
     }
 
     public List<Car> getCars() {
-        return cars;
+        return filteredCars.isEmpty() ? cars : filteredCars;
     }
 
-    public double calculateTotalCost() {
-        return cars.stream().mapToDouble(Car::getPrice).sum();
+    // Фильтрация по цене
+    public void filterByPrice(double minPrice, double maxPrice) {
+        filteredCars = cars.stream()
+                .filter(car -> car.getPrice() >= minPrice && car.getPrice() <= maxPrice)
+                .collect(Collectors.toList());
     }
 
+    // Фильтрация по типу кузова
+    public void filterByType(String carType) {
+        filteredCars = cars.stream()
+                .filter(car -> car.getClass().getSimpleName().equals(carType))
+                .collect(Collectors.toList());
+    }
+
+    // Сброс всех фильтров
+    public void resetFilters() {
+        filteredCars = new ArrayList<>(cars);
+    }
+
+    // Отображение автопарка
     public void displayFleet() {
-        if (cars.isEmpty()) {
-            System.out.println("Автопарк пуст.");
-            return;
+        List<Car> carsToDisplay = getCars();
+        if (carsToDisplay.isEmpty()) {
+            System.out.println("Нет автомобилей для отображения.");
+        } else {
+            carsToDisplay.forEach(Car::displayInfo);
         }
-        cars.forEach(Car::displayInfo);
+    }
+
+    // Расчёт общей стоимости отфильтрованных автомобилей
+    public double calculateTotalCost() {
+        return getCars().stream().mapToDouble(Car::getPrice).sum();
     }
 }
